@@ -1,6 +1,6 @@
  "IDR": "Indonesian Rupiah",
  "USD": "United States Dollar",
- "AED": "United Arab Emirates Dirham",
+ "AED": "United Arab Emirates Dirham",usd
  "AFN": "Afghan Afghani",
  "ALL": "Albanian Lek",
  "AMD": "Armenian Dram",
