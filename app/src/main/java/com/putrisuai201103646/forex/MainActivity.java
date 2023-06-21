@@ -6,6 +6,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.os.Bundle;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+
+import java.text.DecimalFormat;
+
+import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
     private ProgressBar loadingProgressBar;
@@ -35,10 +44,69 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initSwipeRefreshLayout() {
-        swipeRefreshLayout1.setRefreshing(()  {
-            initForex();
+        swipeRefreshLayout1.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                initForex();
 
-            swipeRefreshLayout1.setRefreshing(false);
+                swipeRefreshLayout1.setRefreshing(false);
+
+            }
+        });
+    }
+
+    public String formatNumber(double number, String format) {
+        DecimalFormat decimalFormat = new DecimalFormat(format);
+        return decimalFormat.format(number);
+    }
+
+    private void initForex() {
+        loadingProgressBar.setVisibility(TextView.VISIBLE);
+
+        String url = "https://openexchangerates.org/api/latest.json?app_id=5500840fa53747eba7f9db00663e4888";
+
+        AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+        asyncHttpClient.get(url, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                //Log.d("*tw*", new String(responseBody));
+                Gson gson = new Gson();
+                RootModel rootModel = gson.fromJson(new String(responseBody), RootModel.class);
+                RatesModel ratesModel = rootModel.getRatesModel();
+
+                double idr = ratesModel.getIDR();
+                double usd = ratesModel.getIDR() / ratesModel.getUSD();
+                double aed = ratesModel.getIDR() / ratesModel.getAED();
+                double afn = ratesModel.getIDR() / ratesModel.getAFN();
+                double all = ratesModel.getIDR() / ratesModel.getALL();
+                double amd = ratesModel.getIDR() / ratesModel.getAMD();
+                double ang = ratesModel.getIDR() / ratesModel.getANG();
+                double aoa = ratesModel.getIDR() / ratesModel.getAOA();
+                double ars = ratesModel.getIDR() / ratesModel.getARS();
+                double aud = ratesModel.getIDR() / ratesModel.getAUD();
+
+                idrTextView.setText(formatNumber(idr, "###,##0.##"));
+                usdTextView.setText(formatNumber(usd, "###,##0.##"));
+                aedTextView.setText(formatNumber(aed, "###,##0.##"));
+                afnTextView.setText(formatNumber(afn, "###,##0.##"));
+                allTextView.setText(formatNumber(all, "###,##0.##"));
+                amdTextView.setText(formatNumber(amd, "###,##0.##"));
+                angTextView.setText(formatNumber(ang, "###,##0.##"));
+                aoaTextView.setText(formatNumber(aoa, "###,##0.##"));
+                arsTextView.setText(formatNumber(ars, "###,##0.##"));
+                audTextView.setText(formatNumber(aud, "###,##0.##"));
+
+                loadingProgressBar.setVisibility(TextView.VISIBLE);
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+
+                loadingProgressBar.setVisibility(TextView.VISIBLE);
+
+            }
         });
     }
 }
